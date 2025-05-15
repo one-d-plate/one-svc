@@ -8,7 +8,7 @@ import (
 	"github.com/one-d-plate/one-svc.git/src/configs"
 	"github.com/one-d-plate/one-svc.git/src/pkg"
 	"github.com/uptrace/bun"
-	"github.com/uptrace/bun/dialect/sqlitedialect"
+	"github.com/uptrace/bun/dialect/mysqldialect"
 )
 
 type database struct {
@@ -36,6 +36,6 @@ func (d *database) Connect() (*bun.DB, error) {
 		return nil, err
 	}
 
-	db := bun.NewDB(sqldb, sqlitedialect.New())
+	db := bun.NewDB(sqldb, mysqldialect.New())
 	return db, nil
 }
