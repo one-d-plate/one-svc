@@ -2,9 +2,12 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"strconv"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/one-d-plate/one-svc.git/src/app/entity"
 	"github.com/one-d-plate/one-svc.git/src/app/presentase"
 	"github.com/uptrace/bun"
@@ -41,7 +44,11 @@ func (u *userRepo) GetAll(ctx context.Context, req presentase.GetAllHeader) (*pr
 
 	total, err := query.ColumnExpr("count(*)").ScanAndCount(ctx)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fiber.ErrBadRequest
+		}
+
+		return nil, fiber.ErrInternalServerError
 	}
 
 	err = query.Scan(ctx)

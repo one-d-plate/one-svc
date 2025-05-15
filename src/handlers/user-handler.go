@@ -24,9 +24,7 @@ func (h *UserHandler) GetUsers(c *fiber.Ctx) error {
 
 	users, err := h.user.GetAll(c.Context(), headers)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return HandleFiberError(c, err)
 	}
 	pkg.LogInfo("Success to get user data")
 	return c.JSON(users)

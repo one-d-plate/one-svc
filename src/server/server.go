@@ -49,7 +49,7 @@ func (s *server) Run() {
 		return
 	}
 
-	route.RouteRegistry(ctx, app, dbConnect)
+	route.RouteRegistry(app, dbConnect)
 
 	if err := app.Listen(":8080"); err != nil {
 		pkg.Logger.Fatalf("Failed to start server: %v", err)
