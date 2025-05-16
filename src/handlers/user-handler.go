@@ -33,6 +33,16 @@ func (h *userHandler) CreateUser(c *fiber.Ctx) error {
 	})
 }
 
+func (h *userHandler) GetUser(c *fiber.Ctx) error {
+	param, _ := c.ParamsInt("id")
+
+	user, err := h.user.Get(c.Context(), param)
+	if err != nil {
+		return HandleFiberError(c, err)
+	}
+	return c.JSON(user)
+}
+
 func (h *userHandler) GetUsers(c *fiber.Ctx) error {
 	headers := presentase.GetAllHeader{
 		Limit:  c.QueryInt("limit", 10),

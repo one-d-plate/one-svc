@@ -29,8 +29,16 @@ func (u *userService) Create(ctx context.Context, req presentase.CreateUserReq) 
 	return nil
 }
 
-func stringPtr(s string) *string {
-	return &s
+func (u *userService) Get(ctx context.Context, req int) (*presentase.GetAllResponse, error) {
+	user, err := u.user.Get(ctx, req)
+	if err != nil {
+		pkg.LogError("failed to get data", err)
+		return nil, err
+	}
+	return &presentase.GetAllResponse{
+		Message: "success",
+		Data:    user,
+	}, nil
 }
 
 func (u *userService) GetAll(ctx context.Context, req presentase.GetAllHeader) (*presentase.GetAllResponse, error) {
@@ -48,7 +56,7 @@ func (u *userService) GetAll(ctx context.Context, req presentase.GetAllHeader) (
 		}
 
 		newUser := v
-		newUser.Status = stringPtr(status)
+		newUser.Status = &status
 		users = append(users, newUser)
 	}
 
