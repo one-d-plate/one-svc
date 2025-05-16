@@ -2,8 +2,6 @@ package repository
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"time"
 
 	"strconv"
@@ -49,10 +47,13 @@ func (u *userRepo) Insert(ctx context.Context, req presentase.CreateUserReq) err
 func (u *userRepo) GetAll(ctx context.Context, req presentase.GetAllHeader) (*presentase.GetUsersResponse, error) {
 	users := make([]entity.User, 0)
 
+	// Base query
 	baseQuery := u.db.NewSelect().
 		Model(&users).
-		OrderExpr("id DESC")
+		OrderExpr("id DESC").
+		Limit(req.Limit + 1) // Ambil 1 lebih banyak untuk deteksi nextCursor
 
+	// Filter: Search
 	if req.Search != "" {
 		baseQuery = baseQuery.WhereGroup(" AND ", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.
@@ -62,28 +63,51 @@ func (u *userRepo) GetAll(ctx context.Context, req presentase.GetAllHeader) (*pr
 		})
 	}
 
-	// 1. Get total count
-	var total int64
-	countQuery := baseQuery.Clone()
-	err := countQuery.ColumnExpr("count(*)").Scan(ctx, &total)
-	if err != nil {
-		pkg.LogError("error getting user count", err)
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fiber.ErrBadRequest
+	// Filter: Cursor
+	if req.Cursor != "" {
+		lastID, err := pkg.DecryptCursor(req.Cursor)
+		if err != nil {
+			return nil, fiber.NewError(fiber.StatusBadRequest, "invalid cursor")
 		}
-		return nil, fiber.ErrInternalServerError
+		baseQuery = baseQuery.Where("id < ?", lastID)
 	}
 
-	// 2. Get paged data
-	err = baseQuery.Limit(req.Limit).Offset(pkg.GetOffset(req.Page)).Scan(ctx)
+	// Ambil data
+	err := baseQuery.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	// Siapkan nextCursor (jika ada data lebih)
+	var nextCursor string
+	if len(users) > req.Limit {
+		last := users[req.Limit-1]
+		nextCursor = pkg.EncryptCursor(last.ID)
+		users = users[:req.Limit] // Pangkas 1 data ekstra
+	}
+
+	// Hitung total (opsional)
+	var total int64
+	countQuery := u.db.NewSelect().Model((*entity.User)(nil))
+	if req.Search != "" {
+		countQuery = countQuery.WhereGroup(" AND ", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.
+				Where("username LIKE ?", "%"+req.Search).
+				WhereOr("nama LIKE ?", "%"+req.Search).
+				WhereOr("email LIKE ?", "%"+req.Search)
+		})
+	}
+	err = countQuery.ColumnExpr("count(*)").Scan(ctx, &total)
+	if err != nil {
+		pkg.LogError("error getting user count", err)
+		return nil, fiber.ErrInternalServerError
+	}
+
+	// Meta response
 	meta := presentase.Meta{
-		Total: strconv.FormatInt(total, 10),
-		Page:  strconv.Itoa(req.Page),
-		Limit: strconv.Itoa(req.Limit),
+		Total:  strconv.FormatInt(total, 10),
+		Limit:  strconv.Itoa(req.Limit),
+		Cursor: nextCursor,
 	}
 
 	return &presentase.GetUsersResponse{

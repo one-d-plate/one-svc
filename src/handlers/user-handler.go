@@ -35,9 +35,9 @@ func (h *userHandler) CreateUser(c *fiber.Ctx) error {
 
 func (h *userHandler) GetUsers(c *fiber.Ctx) error {
 	headers := presentase.GetAllHeader{
-		Page:   c.QueryInt("page", 1),
 		Limit:  c.QueryInt("limit", 10),
 		Search: c.Query("search", ""),
+		Cursor: c.Query("cursor"),
 	}
 
 	users, err := h.user.GetAll(c.Context(), headers)

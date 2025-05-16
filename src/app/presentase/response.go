@@ -1,9 +1,9 @@
 package presentase
 
 type Meta struct {
-	Total string `json:"total"`
-	Page  string `json:"page"`
-	Limit string `json:"limit"`
+	Total  string `json:"total"`
+	Limit  string `json:"limit,omitempty"`
+	Cursor string `json:"cursor,omitempty"`
 }
 
 type GetAllResponse struct {
