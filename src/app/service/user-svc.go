@@ -40,7 +40,7 @@ func (u *userService) GetAll(ctx context.Context, req presentase.GetAllHeader) (
 		return nil, err
 	}
 
-	var users []entity.User
+	users := []entity.User{}
 	for _, v := range res.List {
 		status := ""
 		if v.Status != nil {

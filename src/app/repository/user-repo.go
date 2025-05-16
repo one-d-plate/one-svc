@@ -56,9 +56,9 @@ func (u *userRepo) GetAll(ctx context.Context, req presentase.GetAllHeader) (*pr
 	if req.Search != "" {
 		baseQuery = baseQuery.WhereGroup(" AND ", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.
-				Where("username LIKE ?", "%"+req.Search+"%").
-				WhereOr("nama LIKE ?", "%"+req.Search+"%").
-				WhereOr("email LIKE ?", "%"+req.Search+"%")
+				Where("username LIKE ?", "%"+req.Search).
+				WhereOr("nama LIKE ?", "%"+req.Search).
+				WhereOr("email LIKE ?", "%"+req.Search)
 		})
 	}
 
