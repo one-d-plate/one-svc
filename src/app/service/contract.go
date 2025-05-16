@@ -7,5 +7,6 @@ import (
 )
 
 type UserService interface {
+	Create(ctx context.Context, req presentase.CreateUserReq) error
 	GetAll(ctx context.Context, req presentase.GetAllHeader) (*presentase.GetAllResponse, error)
 }

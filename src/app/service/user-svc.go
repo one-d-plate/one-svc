@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
 	"github.com/one-d-plate/one-svc.git/src/app/presentase"
 	"github.com/one-d-plate/one-svc.git/src/app/repository"
@@ -19,11 +19,20 @@ func NewUserService(user repository.UserRepository) UserService {
 	}
 }
 
+func (u *userService) Create(ctx context.Context, req presentase.CreateUserReq) error {
+	err := u.user.Insert(ctx, req)
+	if err != nil {
+		pkg.LogError("failed to insert data", err)
+		return fmt.Errorf("failed to insert data: %w", err)
+	}
+	return nil
+}
+
 func (u *userService) GetAll(ctx context.Context, req presentase.GetAllHeader) (*presentase.GetAllResponse, error) {
 	res, err := u.user.GetAll(ctx, req)
 	if err != nil {
-		pkg.LogError("Failed to fetch user", err)
-		return nil, errors.New("user not found")
+		pkg.LogError("failed to fetch user", err)
+		return nil, err
 	}
 
 	return &presentase.GetAllResponse{

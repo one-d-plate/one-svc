@@ -7,5 +7,6 @@ import (
 )
 
 type UserRepository interface {
-	GetAll(ctx context.Context, req presentase.GetAllHeader) (*presentase.GetUserResponse, error)
+	Insert(ctx context.Context, req presentase.CreateUserReq) error
+	GetAll(ctx context.Context, req presentase.GetAllHeader) (*presentase.GetUsersResponse, error)
 }

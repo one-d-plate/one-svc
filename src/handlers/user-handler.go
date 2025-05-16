@@ -7,15 +7,33 @@ import (
 	"github.com/one-d-plate/one-svc.git/src/pkg"
 )
 
-type UserHandler struct {
+type userHandler struct {
 	user service.UserService
 }
 
-func NewUserHandler(user service.UserService) *UserHandler {
-	return &UserHandler{user: user}
+func NewUserHandler(user service.UserService) *userHandler {
+	return &userHandler{user: user}
 }
 
-func (h *UserHandler) GetUsers(c *fiber.Ctx) error {
+func (h *userHandler) CreateUser(c *fiber.Ctx) error {
+	var body presentase.CreateUserReq
+
+	if err := c.BodyParser(&body); err != nil {
+		return HandleFiberError(c, err)
+	}
+
+	err := h.user.Create(c.Context(), body)
+	if err != nil {
+		return HandleFiberError(c, err)
+	}
+
+	pkg.LogInfo("Success to create user")
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"message": "success",
+	})
+}
+
+func (h *userHandler) GetUsers(c *fiber.Ctx) error {
 	headers := presentase.GetAllHeader{
 		Page:   c.QueryInt("page", 1),
 		Limit:  c.QueryInt("limit", 10),
