@@ -42,7 +42,8 @@ func (u *userRepo) Insert(ctx context.Context, req presentase.CreateUserReq) err
 		Table("users").
 		Exec(ctx)
 
-	return err
+	pkg.LogError("failed to insert user ", err)
+	return fiber.NewError(fiber.StatusBadRequest, "gagal menginput data user")
 }
 
 func (u *userRepo) Get(ctx context.Context, req int) (*entity.User, error) {
@@ -55,8 +56,9 @@ func (u *userRepo) Get(ctx context.Context, req int) (*entity.User, error) {
 
 	err := baseQuery.Scan(ctx)
 	if err != nil {
+		pkg.LogError("failed to get user ", err)
 		if err == sql.ErrNoRows {
-			err = fiber.ErrBadRequest
+			err = fiber.NewError(fiber.StatusBadRequest, "user tidak ditemukan")
 		}
 		return nil, err
 	}
@@ -85,6 +87,7 @@ func (u *userRepo) GetAll(ctx context.Context, req presentase.GetAllHeader) (*pr
 	if req.Cursor != "" {
 		lastID, err := pkg.DecryptCursor(req.Cursor)
 		if err != nil {
+			pkg.LogError("failed to get all users ", err)
 			return nil, fiber.NewError(fiber.StatusBadRequest, "invalid cursor")
 		}
 		baseQuery = baseQuery.Where("id < ?", lastID)
@@ -92,6 +95,7 @@ func (u *userRepo) GetAll(ctx context.Context, req presentase.GetAllHeader) (*pr
 
 	err := baseQuery.Scan(ctx)
 	if err != nil {
+		pkg.LogError("failed to get all users ", err)
 		return nil, err
 	}
 

@@ -2,12 +2,10 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/one-d-plate/one-svc.git/src/app/entity"
 	"github.com/one-d-plate/one-svc.git/src/app/presentase"
 	"github.com/one-d-plate/one-svc.git/src/app/repository"
-	"github.com/one-d-plate/one-svc.git/src/pkg"
 )
 
 type userService struct {
@@ -23,8 +21,7 @@ func NewUserService(user repository.UserRepository) UserService {
 func (u *userService) Create(ctx context.Context, req presentase.CreateUserReq) error {
 	err := u.user.Insert(ctx, req)
 	if err != nil {
-		pkg.LogError("failed to insert data", err)
-		return fmt.Errorf("failed to insert data: %w", err)
+		return err
 	}
 	return nil
 }
@@ -32,7 +29,6 @@ func (u *userService) Create(ctx context.Context, req presentase.CreateUserReq) 
 func (u *userService) Get(ctx context.Context, req int) (*presentase.GetAllResponse, error) {
 	user, err := u.user.Get(ctx, req)
 	if err != nil {
-		pkg.LogError("failed to get data", err)
 		return nil, err
 	}
 	return &presentase.GetAllResponse{
@@ -44,7 +40,6 @@ func (u *userService) Get(ctx context.Context, req int) (*presentase.GetAllRespo
 func (u *userService) GetAll(ctx context.Context, req presentase.GetAllHeader) (*presentase.GetAllResponse, error) {
 	res, err := u.user.GetAll(ctx, req)
 	if err != nil {
-		pkg.LogError("failed to fetch user", err)
 		return nil, err
 	}
 
