@@ -7,6 +7,7 @@ type CreateUserReq struct {
 	Nama     string `json:"nama"`
 	Email    string `json:"email"`
 	Hp       string `json:"hp"`
+	Status   string `json:"status"`
 }
 
 type GetUsersResponse struct {

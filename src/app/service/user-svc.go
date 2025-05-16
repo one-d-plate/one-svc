@@ -62,3 +62,12 @@ func (u *userService) GetAll(ctx context.Context, req presentase.GetAllHeader) (
 		Data:    res,
 	}, nil
 }
+
+func (u *userService) Update(ctx context.Context, req int, payload presentase.CreateUserReq) error {
+	err := u.user.Update(ctx, req, payload)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

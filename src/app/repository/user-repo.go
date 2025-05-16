@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"time"
 
 	"strconv"
@@ -96,7 +98,7 @@ func (u *userRepo) GetAll(ctx context.Context, req presentase.GetAllHeader) (*pr
 	err := baseQuery.Scan(ctx)
 	if err != nil {
 		pkg.LogError("failed to get all users ", err)
-		return nil, err
+		return nil, fiber.NewError(fiber.StatusBadRequest, "data tidak dapat diproses")
 	}
 
 	var nextCursor string
@@ -115,4 +117,38 @@ func (u *userRepo) GetAll(ctx context.Context, req presentase.GetAllHeader) (*pr
 		List: users,
 		Meta: meta,
 	}, nil
+}
+
+func (u *userRepo) Update(ctx context.Context, req int, payload presentase.CreateUserReq) error {
+	_, err := u.Get(ctx, req)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return fiber.NewError(fiber.StatusBadRequest, "user tidak ditemukan")
+		}
+		return err // error lain (misalnya koneksi DB)
+	}
+
+	user := map[string]interface{}{
+		"username":   payload.Username,
+		"email":      payload.Email,
+		"nama":       payload.Nama,
+		"hp":         payload.Hp,
+		"status":     payload.Status,
+		"created_at": time.Now(),
+		"updated_at": time.Now(),
+	}
+
+	_, err = u.db.NewUpdate().
+		Model(&user).
+		Table("users").
+		Where("id = ?", req).
+		Exec(ctx)
+
+	if err != nil {
+		pkg.LogError(fmt.Sprintf("failed to update users id %d", req), err)
+		err = fiber.NewError(fiber.StatusBadRequest, "update user gagal")
+		return err
+	}
+
+	return nil
 }

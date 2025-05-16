@@ -16,6 +16,7 @@ func RouteRegistry(app *fiber.App, db *bun.DB) {
 	handler := handlers.NewUserHandler(userService)
 
 	app.Get("users", handler.GetUsers)
-	app.Get("user/:id", handler.GetUser)
-	app.Post("user", handler.CreateUser)
+	app.Get("users/:id", handler.GetUser)
+	app.Post("users", handler.CreateUser)
+	app.Put("users/:id", handler.UpdateUser)
 }

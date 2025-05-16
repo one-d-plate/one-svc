@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"context"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/one-d-plate/one-svc.git/src/app/presentase"
 	"github.com/one-d-plate/one-svc.git/src/app/service"
@@ -40,6 +42,8 @@ func (h *userHandler) GetUser(c *fiber.Ctx) error {
 	if err != nil {
 		return HandleFiberError(c, err)
 	}
+
+	pkg.LogInfo("Success to get user data")
 	return c.JSON(user)
 }
 
@@ -56,4 +60,21 @@ func (h *userHandler) GetUsers(c *fiber.Ctx) error {
 	}
 	pkg.LogInfo("Success to get user data")
 	return c.JSON(users)
+}
+
+func (h *userHandler) UpdateUser(c *fiber.Ctx) error {
+	param, _ := c.ParamsInt("id")
+	var body presentase.CreateUserReq
+
+	if err := c.BodyParser(&body); err != nil {
+		return HandleFiberError(c, err)
+	}
+	err := h.user.Update(context.Background(), param, body)
+	if err != nil {
+		return HandleFiberError(c, err)
+	}
+	pkg.LogInfo("Success to update user data")
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"message": "success",
+	})
 }
