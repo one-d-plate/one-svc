@@ -152,3 +152,39 @@ func (u *userRepo) Update(ctx context.Context, req int, payload presentase.Creat
 
 	return nil
 }
+
+func (u *userRepo) Delete(ctx context.Context, userIDs []int, include bool) error {
+	now := time.Now()
+
+	baseQuery := u.db.NewUpdate().
+		Model(u.user).
+		Set("deleted_at = ?", now)
+
+	if !include {
+		go func(ctx context.Context) {
+			_, err := baseQuery.
+				Where("id NOT IN (?)", bun.In(userIDs)).
+				Where("deleted_at IS NULL").
+				Exec(ctx)
+
+			if err != nil {
+				pkg.LogError(fmt.Sprintf("failed to soft delete users not in %v", userIDs), err)
+			} else {
+				pkg.LogInfo("goroutine successfully soft-deleted users not in the list")
+			}
+		}(ctx)
+
+		return nil
+	}
+
+	_, err := baseQuery.
+		Where("id IN (?)", bun.In(userIDs)).
+		Exec(ctx)
+
+	if err != nil {
+		pkg.LogError(fmt.Sprintf("failed to soft delete users in %v", userIDs), err)
+		return fiber.NewError(fiber.StatusBadRequest, "hapus user gagal")
+	}
+
+	return nil
+}

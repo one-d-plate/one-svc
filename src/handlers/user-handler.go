@@ -69,11 +69,30 @@ func (h *userHandler) UpdateUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(&body); err != nil {
 		return HandleFiberError(c, err)
 	}
+
 	err := h.user.Update(context.Background(), param, body)
 	if err != nil {
 		return HandleFiberError(c, err)
 	}
 	pkg.LogInfo("Success to update user data")
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"message": "success",
+	})
+}
+
+func (h *userHandler) DeleteUser(c *fiber.Ctx) error {
+	var body presentase.DeleteRequest
+
+	if err := c.BodyParser(&body); err != nil {
+		return HandleFiberError(c, err)
+	}
+
+	err := h.user.Delete(c.Context(), body.ID, body.Include)
+	if err != nil {
+		return HandleFiberError(c, err)
+	}
+
+	pkg.LogInfo("Success to delete user data")
 	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
 		"message": "success",
 	})

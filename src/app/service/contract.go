@@ -11,4 +11,5 @@ type UserService interface {
 	Get(ctx context.Context, req int) (*presentase.GetAllResponse, error)
 	Update(ctx context.Context, req int, payload presentase.CreateUserReq) error
 	GetAll(ctx context.Context, req presentase.GetAllHeader) (*presentase.GetAllResponse, error)
+	Delete(ctx context.Context, id []int, include bool) error
 }

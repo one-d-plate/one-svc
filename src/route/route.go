@@ -19,4 +19,5 @@ func RouteRegistry(app *fiber.App, db *bun.DB) {
 	app.Get("users/:id", handler.GetUser)
 	app.Post("users", handler.CreateUser)
 	app.Put("users/:id", handler.UpdateUser)
+	app.Delete("users", handler.DeleteUser)
 }

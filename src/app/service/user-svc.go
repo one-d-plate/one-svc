@@ -71,3 +71,12 @@ func (u *userService) Update(ctx context.Context, req int, payload presentase.Cr
 
 	return nil
 }
+
+func (u *userService) Delete(ctx context.Context, id []int, include bool) error {
+	err := u.user.Delete(ctx, id, include)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

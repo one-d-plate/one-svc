@@ -12,4 +12,5 @@ type UserRepository interface {
 	Get(ctx context.Context, req int) (*entity.User, error)
 	GetAll(ctx context.Context, req presentase.GetAllHeader) (*presentase.GetUsersResponse, error)
 	Update(ctx context.Context, req int, payload presentase.CreateUserReq) error
+	Delete(ctx context.Context, req []int, include bool) error
 }
